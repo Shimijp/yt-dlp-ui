@@ -1,0 +1,12 @@
+[package]
+name = "yt-dlp-ui"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = "0.36.2"
+egui = "0.36.2"
+arboard = "3.6.1"
+egui-file-dialog = "0.15.0"
+[build-dependencies]
+winres = "0.1"
