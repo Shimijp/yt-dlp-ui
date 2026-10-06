@@ -1,10 +1,9 @@
-pub const YT_DLP_PATH : &str = r"PATH/TO_YOUR/yt-dlp.exe";
 
 
 
 
-#[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt;
+
+
 
 use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
@@ -21,13 +20,9 @@ pub enum DownloadMsg {
 pub fn start_download(dir: String, url: String, args: String, tx: Sender<DownloadMsg>) {
     thread::spawn(move || {
 
-        let mut meta_cmd = Command::new(YT_DLP_PATH);
+        let mut meta_cmd = Command::new("yt-dlp");
         meta_cmd.arg("--print").arg("%(title)s").arg(&url);
-        #[cfg(target_os = "windows")]
-        {
-            const CREATE_NO_WINDOW: u32 = 0x08000000;
-            meta_cmd.creation_flags(CREATE_NO_WINDOW);
-        }
+
 
         if let Ok(output) = meta_cmd.output() {
             if output.status.success() {
@@ -36,7 +31,7 @@ pub fn start_download(dir: String, url: String, args: String, tx: Sender<Downloa
                 let _ = tx.send(DownloadMsg::Metadata { url: url.clone(), name: title });
             }
         }
-        let mut cmd = Command::new(YT_DLP_PATH);
+        let mut cmd = Command::new("yt-dlp");
 
         cmd.current_dir(&dir);
         cmd.arg("--newline");
@@ -46,11 +41,7 @@ pub fn start_download(dir: String, url: String, args: String, tx: Sender<Downloa
         }
 
         cmd.arg(&url).stdout(Stdio::piped());
-        #[cfg(target_os = "windows")]
-        {
-            const CREATE_NO_WINDOW: u32 = 0x08000000;
-            cmd.creation_flags(CREATE_NO_WINDOW);
-        }
+
 
         if let Ok(mut child) = cmd.spawn() {
             if let Some(stdout) = child.stdout.take() {
